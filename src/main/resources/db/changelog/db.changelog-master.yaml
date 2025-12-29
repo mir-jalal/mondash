@@ -5,3 +5,27 @@ databaseChangeLog:
       author: "mirjalal"
       sql:
         - CREATE SCHEMA IF NOT EXISTS public;
+  - changeSet:
+      id: "1"
+      author: "mirjalal"
+      changes:
+        - createTable:
+            schemaName: public
+            tableName: conf
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: key
+                  type: VARCHAR
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: value
+                  type: VARCHAR

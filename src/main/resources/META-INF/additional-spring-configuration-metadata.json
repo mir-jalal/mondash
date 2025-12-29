@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "app.notification.ssl.bundle",
+    "type": "java.lang.String",
+    "description": "SSL bundle for matrix alerts 'app.alert.ssl.bundle'"
+  },
+  {
+    "name": "app.notification.matrix.room",
+    "type": "java.lang.String",
+    "description": "A description for 'app.notification.matrix.room'"
+  },
+  {
+    "name": "app.notification.matrix.url",
+    "type": "java.lang.String",
+    "description": "A description for 'app.notification.matrix.url'"
+  },
+  {
+    "name": "app.notification.matrix.token",
+    "type": "java.lang.String",
+    "description": "A description for 'app.notification.matrix.token'"
+  }
+]}
