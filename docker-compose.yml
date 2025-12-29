@@ -2,7 +2,7 @@
 services:
   db:
     container_name: mondash-db
-    image: postgres
+    image: postgres:16
     ports:
       - "35432:5432"
     environment:
