@@ -1,0 +1,60 @@
+---
+
+variables:
+  FF_TIMESTAMPS: true
+
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: "tcp://docker:2375"
+  
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+image: gradle:jdk21-alpine
+stages:
+  - test
+  - build
+  - release
+
+# test:
+#   stage: test
+#   image: gradle:8.5-jdk21
+#   script:
+#     - ./gradlew test -Dspring.profiles.active=test
+#   artifacts:
+#     reports:
+#       junit: build/test-results/test/*.xml
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "merge_request_event"
+#       when: on_success
+
+build:
+  stage: build
+  image: gradle:8.5-jdk21
+  script:
+    - ./gradlew clean build -x test
+  artifacts:
+    paths:
+      - build/libs/*.jar
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: on_success
+    - if: '$CI_COMMIT_TAG =~ /^mondash-v/'
+      when: on_success
+    - when: never
+
+release:
+  stage: release
+  image: docker:27
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  script:
+    - docker build -t $DOCKER_IMAGE -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE --all-tags
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^mondash-v/'
+      when: on_success
+    - when: never
