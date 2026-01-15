@@ -15,7 +15,7 @@ public class EnvironmentService {
     private final Command restartEnvironmentCommand;
 
     public EnvironmentService(GitlabConfiguration gitlabConfiguration) {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("token", gitlabConfiguration.getToken());
         params.put("ref", "main");
         params.put("variables[environment]", "skip");

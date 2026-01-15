@@ -1,25 +1,26 @@
 package net.mirjalal.mondash.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import co.elastic.clients.util.DateTime;
+import lombok.Data;
 
-@RequiredArgsConstructor
-@Slf4j
-@Setter
-@Getter
-@Document(indexName = "splitkey-alerts")
+@Data
 public class Alert {
-    @Id
     private String id;
-
     private String latestErrorMessage;
     private String monitorName;
     private String monitorUrl;
     private String statusMessage;
-    
+    private DateTime timestamp;
+
+    public static Alert createAlert(ObjectNode document) {
+        Alert alert = new Alert();
+        alert.setLatestErrorMessage(document.get("latestErrorMessage").asText("null"));
+        alert.setMonitorName(document.get("monitorName").asText("null"));
+        alert.setMonitorUrl(document.get("monitorUrl").asText("null"));
+        alert.setStatusMessage(document.get("statusMessage").asText("null"));
+        alert.setTimestamp(DateTime.of((document.get("@timestamp").asText())));
+        return alert;
+    }
 }

@@ -1,5 +1,9 @@
 package net.mirjalal.mondash.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
+
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientSsl;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,17 +17,45 @@ import net.mirjalal.mondash.repository.AlertRepository;
 import net.mirjalal.mondash.repository.ConfigRepository;
 
 @Service
-public class AlertService extends AlertClient{
-    
-    public AlertService(AlertRepository alertRepository, ConfigRepository configRepository, NotificationConfiguration notificationConfiguration, WebClientSsl ssl) {
-        this.setAlertStrategy(new ElasticAlert(alertRepository, configRepository));
+public class AlertService {
+
+    private final AlertClient alertClient;
+    private final ConfigRepository configRepository;
+
+    public AlertService(AlertSourceFactory alertSourceFactory, ConfigRepository configRepository, AlertSourceRepository alertSourceRepository, NotificationConfiguration notificationConfiguration, WebClientSsl ssl) {
+        this.configRepository = configRepository;
+        AlertSource alertSource = (AlertSource) sourceFactory.decryptSource(alertSourceRepository.getByName("elastic"));
+        this.alertClient = AlertClientFactory.createAlertClient(alertSource);
         Notifier notifier = new Notifier();
         notifier.setNotificationStrategy(new MatrixNotification(notificationConfiguration, ssl));
-        this.addListener(notifier);
+        this.alertClient.addListener(notifier);
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 15000)
     public void runActiveAlerts() {
-        getActiveAlerts();
+        Optional<Config> optionalLatestTimestamp = configRepository.findByKey("alertLatestTimestamp");
+
+        Config latestTimestamp;
+        LocalDateTime nowTimestamp = LocalDateTime.now(ZoneId.of("UTC"));
+
+        if(optionalLatestTimestamp.isPresent()) {
+            latestTimestamp = optionalLatestTimestamp.get();
+            if(latestTimestamp.getValue().equals("")){
+                latestTimestamp.setValue(nowTimestamp.minusMonths(1).toString());
+            }
+        }
+        else {
+            latestTimestamp = new Config("alertLatestTimestamp", nowTimestamp.minusMonths(1).toString());      
+        }
+
+        this.alertClient.getActiveAlerts(latestTimestamp.getValue());
+
+        latestTimestamp.setValue(nowTimestamp.toString());
+
+        configRepository.save(latestTimestamp);
+    }
+
+    public Iterable<Alert> getAlerts() {
+        return this.alertClient.getAlerts();
     }
 }

@@ -24,8 +24,8 @@ public class MatrixNotification implements NotificationStrategy {
 
     @Override
     public void sendNotification(Alert alert) {
-        String url = this.matrixUrl + "/_matrix/client/v3/rooms/" + this.matrixRoom + ":cyber.ee/send/m.room.message/" + alert.getTimestamp().toEpochMilli();
-        HashMap <String, String> body = new HashMap<String, String>();
+        String url = this.matrixUrl + "/_matrix/client/v3/rooms/" + this.matrixRoom + "/send/m.room.message/" + alert.getTimestamp().toEpochMilli() + "0";
+        HashMap <String, String> body = new HashMap<>();
         body.put("body", alert.getStatusMessage());
         body.put("msgtype", "m.text");
         webClient.put()
