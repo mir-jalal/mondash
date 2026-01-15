@@ -9,11 +9,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import net.mirjalal.mondash.alert.AlertClient;
-import net.mirjalal.mondash.alert.ElasticAlert;
+import net.mirjalal.mondash.alert.AlertClientFactory;
 import net.mirjalal.mondash.configuration.NotificationConfiguration;
+import net.mirjalal.mondash.model.Alert;
+import net.mirjalal.mondash.model.AlertSource;
+import net.mirjalal.mondash.model.Config;
+import net.mirjalal.mondash.model.factory.AlertSourceFactory;
 import net.mirjalal.mondash.notification.MatrixNotification;
 import net.mirjalal.mondash.notification.Notifier;
-import net.mirjalal.mondash.repository.AlertRepository;
+import net.mirjalal.mondash.repository.AlertSourceRepository;
 import net.mirjalal.mondash.repository.ConfigRepository;
 
 @Service

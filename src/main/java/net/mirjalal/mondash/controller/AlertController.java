@@ -18,7 +18,7 @@ public class AlertController {
         this.alertService = alertService;
     }
 
-    @GetMapping()
+    @GetMapping
     public Iterable<Alert> getAlerts() {
         return alertService.getAlerts();
     }

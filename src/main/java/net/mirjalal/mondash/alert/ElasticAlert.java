@@ -25,8 +25,9 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
-import jakarta.annotation.PreDestroy;
+import net.mirjalal.mondash.model.Alert;
 import net.mirjalal.mondash.ssl.SslUtil;
+import jakarta.annotation.PreDestroy;
 
 
 public class ElasticAlert implements AlertStrategy {
