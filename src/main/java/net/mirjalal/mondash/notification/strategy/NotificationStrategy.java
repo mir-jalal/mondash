@@ -1,4 +1,4 @@
-package net.mirjalal.mondash.notification;
+package net.mirjalal.mondash.notification.strategy;
 
 import net.mirjalal.mondash.model.Alert;
 

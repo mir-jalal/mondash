@@ -1,24 +1,29 @@
 package net.mirjalal.mondash.service;
 
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
 
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientSsl;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import net.mirjalal.mondash.alert.AlertClient;
 import net.mirjalal.mondash.alert.AlertClientFactory;
-import net.mirjalal.mondash.configuration.NotificationConfiguration;
 import net.mirjalal.mondash.model.Alert;
 import net.mirjalal.mondash.model.AlertSource;
 import net.mirjalal.mondash.model.Config;
-import net.mirjalal.mondash.model.factory.AlertSourceFactory;
-import net.mirjalal.mondash.notification.MatrixNotification;
+import net.mirjalal.mondash.model.NotifierSource;
+import net.mirjalal.mondash.model.factory.SourceFactory;
 import net.mirjalal.mondash.notification.Notifier;
+import net.mirjalal.mondash.notification.strategy.MatrixNotification;
 import net.mirjalal.mondash.repository.AlertSourceRepository;
 import net.mirjalal.mondash.repository.ConfigRepository;
+import net.mirjalal.mondash.repository.NotifierSourceRepository;
 
 @Service
 public class AlertService {
@@ -26,12 +31,13 @@ public class AlertService {
     private final AlertClient alertClient;
     private final ConfigRepository configRepository;
 
-    public AlertService(AlertSourceFactory alertSourceFactory, ConfigRepository configRepository, AlertSourceRepository alertSourceRepository, NotificationConfiguration notificationConfiguration, WebClientSsl ssl) {
+    public AlertService(SourceFactory sourceFactory, ConfigRepository configRepository, AlertSourceRepository alertSourceRepository, NotifierSourceRepository notifierSourceRepository) throws KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
         this.configRepository = configRepository;
         AlertSource alertSource = (AlertSource) sourceFactory.decryptSource(alertSourceRepository.getByName("elastic"));
         this.alertClient = AlertClientFactory.createAlertClient(alertSource);
         Notifier notifier = new Notifier();
-        notifier.setNotificationStrategy(new MatrixNotification(notificationConfiguration, ssl));
+        NotifierSource notifierSource = (NotifierSource) sourceFactory.decryptSource(notifierSourceRepository.getByName("id-matrix"));
+        notifier.setNotificationStrategy(new MatrixNotification(notifierSource));
         this.alertClient.addListener(notifier);
     }
 

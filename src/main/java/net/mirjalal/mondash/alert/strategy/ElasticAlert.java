@@ -1,4 +1,4 @@
-package net.mirjalal.mondash.alert;
+package net.mirjalal.mondash.alert.strategy;
 
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -11,30 +11,34 @@ import java.util.List;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import net.mirjalal.mondash.http.HttpUtils;
 import net.mirjalal.mondash.model.Alert;
-import net.mirjalal.mondash.ssl.SslUtil;
+import net.mirjalal.mondash.model.AlertSource;
 import jakarta.annotation.PreDestroy;
-
 
 public class ElasticAlert implements AlertStrategy {
 
+    public static String USERNAME = "username";
+    public static String PASSWORD = "password";
+    public static String URL = "url";
+    public static String CA_CERT = "caCert";
+    public static String INDEX_NAME = "indexName";
+
     private final ElasticsearchClient client;
-    private String indexName;
     private final String timestampField = "@timestamp";
+    private String indexName;
 
     @PreDestroy
     public void preDestroy() {
@@ -43,28 +47,17 @@ public class ElasticAlert implements AlertStrategy {
         } catch (IOException e) {}
     }
 
-    public ElasticAlert(
-        String username,
-        String password,
-        String hostname,
-        String caCert,
-        String indexName
-    ) throws KeyManagementException, CertificateException, KeyStoreException, NoSuchAlgorithmException, IOException {
+    public ElasticAlert(AlertSource alertSource) throws KeyManagementException, CertificateException, KeyStoreException, NoSuchAlgorithmException, IOException {
+        String username = alertSource.getParameterValue(USERNAME);
+        String password = alertSource.getParameterValue(PASSWORD);
+        String hostname = alertSource.getParameterValue(URL);
+        String caCert = alertSource.getParameterValue(CA_CERT);
+        this.indexName = alertSource.getParameterValue(INDEX_NAME);
 
-        CredentialsProvider provider = new BasicCredentialsProvider();
-        provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
-
-        SSLContext sslContext = SslUtil.createSslContext(caCert);
-
-        RestClient restClient = RestClient.builder(HttpHost.create(hostname))
-            .setHttpClientConfigCallback(cb -> {
-                cb.setDefaultCredentialsProvider(provider);
-                cb.setSSLContext(sslContext);
-                return cb;
-            }).build();
+        RestClient restClient = createRestClient(hostname, username, password, caCert);
 
         ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
-        this.indexName = indexName;
+        
         this.client = new ElasticsearchClient(transport);
     }
 
@@ -86,17 +79,32 @@ public class ElasticAlert implements AlertStrategy {
         );
     }
 
-    private List<Alert> getAlertsByTimestamp(String timestamp) throws IOException {
+    private SearchResponse<ObjectNode> searchAfterTimestamp(String timestamp) throws ElasticsearchException, IOException {
         SearchRequest request = this.createSearchSearchRequestTimestampAfter(timestamp);
 
-        SearchResponse<ObjectNode> response = this.client.search(request, ObjectNode.class);
+        return this.client.search(request, ObjectNode.class);
+    }
+
+    private List<Alert> getAlertsByTimestamp(String timestamp) throws IOException {
 
         List<Alert> newAlerts = new ArrayList<>();
         
-        response.hits().hits().forEach(hit -> {
+        this.searchAfterTimestamp(timestamp).hits().hits().forEach(hit -> {
             newAlerts.add(Alert.createAlert(hit.source()));
         });
         return newAlerts;
+    }
+
+    private RestClient createRestClient(String hostname, String username, String password, String caCert) throws CertificateException, KeyStoreException, NoSuchAlgorithmException, IOException, KeyManagementException {
+        CredentialsProvider provider = HttpUtils.createCredentialsProvider(username, password);
+        SSLContext sslContext = HttpUtils.createSslContext(caCert);
+        
+        return RestClient.builder(HttpHost.create(hostname))
+            .setHttpClientConfigCallback(cb -> {
+                cb.setDefaultCredentialsProvider(provider);
+                cb.setSSLContext(sslContext);
+                return cb;
+            }).build();
     }
 
     @Override

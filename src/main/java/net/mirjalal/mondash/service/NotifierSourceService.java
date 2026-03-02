@@ -6,21 +6,20 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
-import net.mirjalal.mondash.model.AlertSource;
+import net.mirjalal.mondash.model.NotifierSource;
 import net.mirjalal.mondash.model.Source;
 import net.mirjalal.mondash.model.factory.SourceFactory;
-import net.mirjalal.mondash.repository.AlertSourceRepository;
+import net.mirjalal.mondash.repository.NotifierSourceRepository;
 
 @Service
 @AllArgsConstructor
-public class AlertSourceService extends SourceService{
-
-    private final AlertSourceRepository alertSourceRepository;
+public class NotifierSourceService extends SourceService {
+    private final NotifierSourceRepository notifierSourceRepository;
     private final SourceFactory sourceFactory;
 
     @Override
     public Source saveSource(Source source) {
-        return alertSourceRepository.save( (AlertSource) source);
+        return notifierSourceRepository.save( (NotifierSource) source);
     }
 
 	@Override
@@ -30,16 +29,16 @@ public class AlertSourceService extends SourceService{
 
     @Override
     public Source getSourceById(Long id) {
-        return alertSourceRepository.getReferenceById(BigInteger.valueOf( id ));
+        return notifierSourceRepository.getReferenceById(BigInteger.valueOf( id ));
     }
 
     @Override
     public List<Source> getAllSources() {
-        return alertSourceRepository.findAll().stream().map(s -> (Source) s).toList();
+        return notifierSourceRepository.findAll().stream().map(s -> (Source) s).toList();
     }
 
     @Override
     public void delete(String name) {
-        alertSourceRepository.deleteByName(name);
+        notifierSourceRepository.deleteByName(name);
     }
 }

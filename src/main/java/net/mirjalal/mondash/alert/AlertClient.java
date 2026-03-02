@@ -1,13 +1,15 @@
 package net.mirjalal.mondash.alert;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import net.mirjalal.mondash.alert.strategy.AlertStrategy;
 import net.mirjalal.mondash.model.Alert;
 import lombok.Setter;
 
 @Setter
-public class AlertClient {
+public class AlertClient implements PropertyChangeListener {
     
     public static final String NOTIFIERS = "NOTIFIERS";
     private AlertStrategy alertStrategy;
@@ -26,5 +28,11 @@ public class AlertClient {
     }
     public Iterable<Alert> getAlerts() {
         return this.alertStrategy.getAlerts();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        String timestamp = (String) evt.getNewValue();
+        this.getActiveAlerts(timestamp);
     }
 }

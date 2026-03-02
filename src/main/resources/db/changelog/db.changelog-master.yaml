@@ -69,15 +69,16 @@ databaseChangeLog:
               - column:
                   name: key
                   type: VARCHAR
-                  constraints:
-                    unique: true
-                    nullable: false
               - column:
                   name: value
                   type: VARCHAR
               - column:
                   name: sensitive
                   type: BOOLEAN
+        - addUniqueConstraint:
+            columnNames: alert_source_id,key
+            tableName: alert_source_parameters
+            constraintName: alert_source_parameters_id_key
         - addForeignKeyConstraint:
             baseTableName: alert_source_parameters
             baseColumnNames: alert_source_id
@@ -85,3 +86,61 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_alert_source_parameters
             onDelete: CASCADE
+  - changeSet:
+      id: "3"
+      author: "mirjalal"
+      changes:
+        - createTable:
+            schemaName: public
+            tableName: notifier_source
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR
+                  constraints:
+                    unique: true
+                    nullable: false
+        - createTable:
+            schemaName: public
+            tableName: notifier_source_parameters
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: notifier_source_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: key
+                  type: VARCHAR
+              - column:
+                  name: value
+                  type: VARCHAR
+              - column:
+                  name: sensitive
+                  type: BOOLEAN
+        - addUniqueConstraint:
+            columnNames: notifier_source_id,key
+            tableName: notifier_source_parameters
+            constraintName: notifier_source_parameters_id_key
+        - addForeignKeyConstraint:
+            baseTableName: notifier_source_parameters
+            baseColumnNames: notifier_source_id
+            referencedTableName: notifier_source
+            referencedColumnNames: id
+            constraintName: fk_notifier_source_parameters
+            onDelete: CASCADE
+        

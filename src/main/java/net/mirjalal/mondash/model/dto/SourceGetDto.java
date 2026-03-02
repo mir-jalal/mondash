@@ -12,9 +12,9 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class AlertSourceGetDto {
+public class SourceGetDto {
 
     private BigInteger id;
     private String name;
-    private List<AlertSourceParameterDto> parameters;
+    private List<SourceParameterDto> parameters;
 }

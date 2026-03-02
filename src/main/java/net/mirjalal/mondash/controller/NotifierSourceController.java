@@ -1,20 +1,20 @@
 package net.mirjalal.mondash.controller;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import lombok.AllArgsConstructor;
 import net.mirjalal.mondash.model.factory.SourceFactory;
 import net.mirjalal.mondash.model.factory.SourceFactory.SourceType;
-import net.mirjalal.mondash.service.AlertSourceService;
+import net.mirjalal.mondash.service.NotifierSourceService;
 import net.mirjalal.mondash.service.SourceService;
 
-@RestController
+@Controller
 @AllArgsConstructor
-@RequestMapping("/api/alert-source")
-public class AlertSourceController extends SourceController {
-    private final AlertSourceService alertSourceService;
-    private final SourceType sourceType = SourceFactory.SourceType.ALERT;
+@RequestMapping("/api/notifier-source")
+public class NotifierSourceController extends SourceController {
+    private final NotifierSourceService notifierSourceService;
+    private final SourceType sourceType = SourceFactory.SourceType.NOTIFIER;
 
 	@Override
 	public SourceType getSourceType() {
@@ -23,6 +23,6 @@ public class AlertSourceController extends SourceController {
 
 	@Override
 	public SourceService getSourceService() {
-        return this.alertSourceService;
+        return this.notifierSourceService;
     }
 }

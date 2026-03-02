@@ -6,12 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import jakarta.transaction.Transactional;
-import net.mirjalal.mondash.model.AlertSource;
+import net.mirjalal.mondash.model.NotifierSource;
 
 @Repository
 @Transactional
-public interface AlertSourceRepository extends JpaRepository<AlertSource, BigInteger> {
+public interface NotifierSourceRepository extends JpaRepository<NotifierSource, BigInteger> {
     void deleteByName(String name);
 
-    AlertSource getByName(String string);
+    NotifierSource getByName(String string);
 }

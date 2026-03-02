@@ -6,26 +6,23 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
-@Table(name = "alert_source_parameters")
-public class AlertParameter extends Parameter {
+@Table(name = "notifier_source_parameters")
+public class NotifierParameter extends Parameter {
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "alert_source_id")
+    @JoinColumn(name = "notifier_source_id")
     @EqualsAndHashCode.Exclude
-    private AlertSource alertSource;
+    private NotifierSource notifierSource;
 
     @Override
     public void setSource(Source source) {
-        this.alertSource = (AlertSource) source;
+        this.notifierSource = (NotifierSource) source;
     }
 
     @Override
     public Source getSource() {
-        return this.alertSource;
+        return this.notifierSource;
     }
 }
